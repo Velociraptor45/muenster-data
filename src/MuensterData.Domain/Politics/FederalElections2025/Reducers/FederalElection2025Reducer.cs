@@ -25,4 +25,16 @@ public static class FederalElection2025Reducer
             Results = action.Results
         };
     }
+
+    [ReducerMethod(typeof(ToggleVoteCategoryAction))]
+    public static FederalElection2025State OnToggleVoteCategory(FederalElection2025State state)
+    {
+        return state with
+        {
+            ConstituencyMapSettings = state.ConstituencyMapSettings with
+            {
+                ShowFirstVotes = !state.ConstituencyMapSettings.ShowFirstVotes
+            }
+        };
+    }
 }

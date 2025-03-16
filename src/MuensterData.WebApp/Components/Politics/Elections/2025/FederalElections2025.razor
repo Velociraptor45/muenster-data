@@ -5,21 +5,31 @@
 @using MuensterData.Domain.Politics.FederalElections2025.States
 @using MuensterData.Domain.Politics.States
 @using Syncfusion.Blazor.Maps
+@using Syncfusion.Blazor.Buttons
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
 
-<h1>Federal Elections 2025</h1>
+<h1>Bundestagswahl 2025</h1>
 
 @if (State.Value.ConstituencyPolygonMap is not null)
 {
     <div>
+        <div>
+            <SfSwitch TChecked="bool"
+                      Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
+                      OnLabel="Erststimme"
+                      OffLabel="Zweitstimme"
+                      CssClass="vote-class-toggle"
+                      ValueChange="OnVoteCategoryToggled">
+            </SfSwitch>
+        </div>
         <SfMaps>
             <MapsAreaSettings Background="transparent"/>
             <MapsLayers>
                 <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
                            DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
-                    <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="WinnerFirstVote">
+                    <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
                         <MapsShapeColorMappings>
                             <MapsShapeColorMapping Value="SPD" Color='new[] { "#c93229" }'/>
                             <MapsShapeColorMapping Value="CDU" Color='new[] { "#73655e" }'/>
@@ -39,10 +49,17 @@
 }
 
 @code {
+    public string ColorPath => State.Value.ConstituencyMapSettings.ShowFirstVotes ? "WinnerFirstVote" : "WinnerSecondVote";
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
         Dispatcher.Dispatch(new LoadPageAction());
+    }
+
+    private void OnVoteCategoryToggled()
+    {
+        Dispatcher.Dispatch(new ToggleVoteCategoryAction());
     }
 }
