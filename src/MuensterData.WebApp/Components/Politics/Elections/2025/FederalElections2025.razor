@@ -1,50 +1,48 @@
-﻿@using System.Reflection
-@using System.Text.Json
+﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+
+@using Fluxor
+@using MuensterData.Domain.Politics.FederalElections2025.Actions
+@using MuensterData.Domain.Politics.FederalElections2025.States
 @using MuensterData.Domain.Politics.States
-@using MuensterData.Infrastructure.DataLoading
 @using Syncfusion.Blazor.Maps
+
+@inject IState<FederalElection2025State> State
+@inject IDispatcher Dispatcher
 
 <h1>Federal Elections 2025</h1>
 
-<div>
-    <SfMaps>
-        <MapsAreaSettings Background="transparent" />
-        <MapsLayers>
-            <MapsLayer ShapeData="_content" TValue="ConstituencyElectionResult" DataSource="_results"
-                ShapeDataPath="Id" ShapePropertyPath='new[] {"BLOWAST_ID"}'>
-                <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="WinnerFirstVote">
-                    <MapsShapeColorMappings>
-                        <MapsShapeColorMapping Value="SPD" Color='new[] { "#c93229" }' />
-                        <MapsShapeColorMapping Value="CDU" Color='new[] { "#73655e" }' />
-                        <MapsShapeColorMapping Value="GRÜNE" Color='new[] { "#64ad44" }' />
-                        <MapsShapeColorMapping Value="FDP" Color='new[] { "#f0bf1e" }' />
-                        <MapsShapeColorMapping Value="AfD" Color='new[] { "#459fe6" }' />
-                        <MapsShapeColorMapping Value="Linke" Color='new[] { "#a250a6" }' />
-                        <MapsShapeColorMapping Value="BSW" Color='new[] { "#8c1c55" }' />
-                    </MapsShapeColorMappings>
-                </MapsShapeSettings>
-            </MapsLayer>
-        </MapsLayers>
-        <MapsZoomSettings Enable="true" />
-        <MapsLegendSettings Visible="true" />
-    </SfMaps>
-</div>
+@if (State.Value.ConstituencyPolygonMap is not null)
+{
+    <div>
+        <SfMaps>
+            <MapsAreaSettings Background="transparent"/>
+            <MapsLayers>
+                <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
+                           DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
+                    <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="WinnerFirstVote">
+                        <MapsShapeColorMappings>
+                            <MapsShapeColorMapping Value="SPD" Color='new[] { "#c93229" }'/>
+                            <MapsShapeColorMapping Value="CDU" Color='new[] { "#73655e" }'/>
+                            <MapsShapeColorMapping Value="GRÜNE" Color='new[] { "#64ad44" }'/>
+                            <MapsShapeColorMapping Value="FDP" Color='new[] { "#f0bf1e" }'/>
+                            <MapsShapeColorMapping Value="AfD" Color='new[] { "#459fe6" }'/>
+                            <MapsShapeColorMapping Value="Linke" Color='new[] { "#a250a6" }'/>
+                            <MapsShapeColorMapping Value="BSW" Color='new[] { "#8c1c55" }'/>
+                        </MapsShapeColorMappings>
+                    </MapsShapeSettings>
+                </MapsLayer>
+            </MapsLayers>
+            <MapsZoomSettings Enable="true"/>
+            <MapsLegendSettings Visible="true"/>
+        </SfMaps>
+    </div>
+}
 
 @code {
-    private object? _content;
-    private List<ConstituencyElectionResult> _results = [];
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        var reader = new CsvReader();
-        _results = reader.LoadFederalElectionResults2025().ToList();
-
-        var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var filePath = Path.Combine(executionDirectory!, "data", "stimmbezirk.geojson");
-        var fileContent = File.ReadAllText(filePath);
-
-        _content = JsonSerializer.Deserialize<object>(fileContent);
+        Dispatcher.Dispatch(new LoadPageAction());
     }
 }

@@ -16,13 +16,11 @@ public class TrafficEffects
     }
 
     [EffectMethod(typeof(TrafficPageEnteredAction))]
-    public Task HandleTrafficPageEnteredAction(IDispatcher dispatcher)
+    public async Task HandleTrafficPageEnteredAction(IDispatcher dispatcher)
     {
-        var accidents = _csvReader.LoadAccidents().ToList();
+        var accidents = await _csvReader.LoadAccidentsAsync();
 
         dispatcher.Dispatch(new AllAccidentsLoadedAction(accidents));
-
-        return Task.CompletedTask;
     }
 
 }

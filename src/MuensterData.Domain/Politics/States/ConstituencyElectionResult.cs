@@ -4,5 +4,5 @@ public record ConstituencyElectionResult(string Id, string Name, IReadOnlyCollec
     IReadOnlyCollection<PartyElectionResult> SecondVote)
 {
     public string WinnerFirstVote => FirstVote.MaxBy(p => p.Votes)!.Name;
-    public string WinnerSecondVote => SecondVote.MaxBy(p => p.Votes)?.Name ?? "";
+    public string WinnerSecondVote => SecondVote.MaxBy(p => p.Votes)!.Name;
 }

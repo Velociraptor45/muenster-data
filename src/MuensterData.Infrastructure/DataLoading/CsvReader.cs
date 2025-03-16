@@ -12,9 +12,9 @@ public class CsvReader : ICsvReader
     private static readonly CultureInfo EnglishCulture = new("en-en");
     private const string One = "1";
 
-    public IEnumerable<Accident> LoadAccidents()
+    public async Task<List<Accident>> LoadAccidentsAsync()
     {
-        var rows = GetFileContent("unfaelle-muenster.csv");
+        var rows = await GetFileContentAsync("unfaelle-muenster.csv");
 
         const int longRowIndex = 20;
         const int latRowIndex = 21;
@@ -27,6 +27,7 @@ public class CsvReader : ICsvReader
         const int withTruckRowIndex = 16;
         const int withOtherRowIndex = 17;
 
+        var list = new List<Accident>();
         foreach (var row in rows.Skip(1))
         {
             var columns = row.Split(',');
@@ -42,12 +43,14 @@ public class CsvReader : ICsvReader
             var withTruck = columns[withTruckRowIndex] == One;
             var withOther = columns[withOtherRowIndex] == One;
 
-            yield return new Accident(new(longitude, latitude), year, lightCondition, withBicycle, withCar,
-                withPedestrian, withMotorcycle, withTruck, withOther);
+            list.Add(new Accident(new(longitude, latitude), year, lightCondition, withBicycle, withCar,
+                withPedestrian, withMotorcycle, withTruck, withOther));
         }
+
+        return list;
     }
 
-    public IEnumerable<ConstituencyElectionResult> LoadFederalElectionResults2025()
+    public async Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async()
     {
         var partyList = new Dictionary<string, string>()
         {
@@ -89,13 +92,14 @@ public class CsvReader : ICsvReader
             {"F18", "WerteUnion"}
         };
 
-        var rows = GetFileContent("Open-Data-05515000-Wahl-zum-Deutschen-Bundestag-Wahlbezirk.csv");
+        var rows = await GetFileContentAsync("Open-Data-05515000-Wahl-zum-Deutschen-Bundestag-Wahlbezirk.csv");
 
         var headlineRow = rows[0].Split(';');
 
         var idRowIndex = Array.IndexOf(headlineRow, "gebiet-nr");
         var constituencyNameRowIndex = Array.IndexOf(headlineRow, "gebiet-name");
 
+        var list = new List<ConstituencyElectionResult>();
         foreach (var row in rows.Skip(1))
         {
             var columns = row.Split(';');
@@ -124,14 +128,15 @@ public class CsvReader : ICsvReader
                 }
             }
 
-            yield return new ConstituencyElectionResult(id, constituencyName, firstVotes, secondVotes);
+            list.Add(new ConstituencyElectionResult(id, constituencyName, firstVotes, secondVotes));
         }
+        return list;
     }
 
-    private static string[] GetFileContent(string fileName)
+    private static async Task<string[]> GetFileContentAsync(string fileName)
     {
         var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         var filePath = Path.Combine(executionDirectory!, "data", fileName);
-        return File.ReadAllLines(filePath, Encoding.UTF8);
+        return await File.ReadAllLinesAsync(filePath, Encoding.UTF8);
     }
 }

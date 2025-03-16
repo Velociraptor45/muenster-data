@@ -4,6 +4,6 @@ using MuensterData.Domain.Traffic.States;
 namespace MuensterData.Domain.Common.Ports;
 public interface ICsvReader
 {
-    IEnumerable<Accident> LoadAccidents();
-    IEnumerable<ConstituencyElectionResult> LoadFederalElectionResults2025();
+    Task<List<Accident>> LoadAccidentsAsync();
+    Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async();
 }

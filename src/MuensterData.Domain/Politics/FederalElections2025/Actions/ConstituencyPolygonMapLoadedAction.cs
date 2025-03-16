@@ -1,0 +1,3 @@
+﻿namespace MuensterData.Domain.Politics.FederalElections2025.Actions;
+
+public record ConstituencyPolygonMapLoadedAction(object ConstituencyPolygonMap);
