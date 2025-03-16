@@ -18,6 +18,9 @@
             <div @onclick="OnTrafficClicked" class="traffic">
                 Verkehr
             </div>
+            <div @onclick="OnPoliticsClicked" class="politics">
+                Politik
+            </div>
         </div>
     </div>
 
@@ -30,5 +33,10 @@
     private void OnTrafficClicked()
     {
         NavigationManager.NavigateTo("traffic");
+    }
+
+    private void OnPoliticsClicked()
+    {
+        NavigationManager.NavigateTo("politics");
     }
 }

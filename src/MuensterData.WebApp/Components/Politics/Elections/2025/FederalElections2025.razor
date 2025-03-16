@@ -1,0 +1,50 @@
+﻿@using System.Reflection
+@using System.Text.Json
+@using MuensterData.Domain.Politics.States
+@using MuensterData.Infrastructure.DataLoading
+@using Syncfusion.Blazor.Maps
+
+<h1>Federal Elections 2025</h1>
+
+<div>
+    <SfMaps>
+        <MapsAreaSettings Background="transparent" />
+        <MapsLayers>
+            <MapsLayer ShapeData="_content" TValue="ConstituencyElectionResult" DataSource="_results"
+                ShapeDataPath="Id" ShapePropertyPath='new[] {"BLOWAST_ID"}'>
+                <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="WinnerFirstVote">
+                    <MapsShapeColorMappings>
+                        <MapsShapeColorMapping Value="SPD" Color='new[] { "#c93229" }' />
+                        <MapsShapeColorMapping Value="CDU" Color='new[] { "#73655e" }' />
+                        <MapsShapeColorMapping Value="GRÜNE" Color='new[] { "#64ad44" }' />
+                        <MapsShapeColorMapping Value="FDP" Color='new[] { "#f0bf1e" }' />
+                        <MapsShapeColorMapping Value="AfD" Color='new[] { "#459fe6" }' />
+                        <MapsShapeColorMapping Value="Linke" Color='new[] { "#a250a6" }' />
+                        <MapsShapeColorMapping Value="BSW" Color='new[] { "#8c1c55" }' />
+                    </MapsShapeColorMappings>
+                </MapsShapeSettings>
+            </MapsLayer>
+        </MapsLayers>
+        <MapsZoomSettings Enable="true" />
+        <MapsLegendSettings Visible="true" />
+    </SfMaps>
+</div>
+
+@code {
+    private object? _content;
+    private List<ConstituencyElectionResult> _results = [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        var reader = new CsvReader();
+        _results = reader.LoadFederalElectionResults2025().ToList();
+
+        var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var filePath = Path.Combine(executionDirectory!, "data", "stimmbezirk.geojson");
+        var fileContent = File.ReadAllText(filePath);
+
+        _content = JsonSerializer.Deserialize<object>(fileContent);
+    }
+}

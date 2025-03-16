@@ -11,6 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="data\Open-Data-05515000-Wahl-zum-Deutschen-Bundestag-Wahlbezirk.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\stimmbezirk.geojson">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="data\unfaelle-muenster.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>..\..\..\..\MuensterData.WebApp\bin\Debug\net9.0\data\unfaelle-muenster.csv</Link>
