@@ -8,6 +8,8 @@
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Data
+@using SortOrder = Syncfusion.Blazor.DropDowns.SortOrder
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
@@ -102,6 +104,45 @@
                 }
             </div>
         </div>
+        <div class="pt-2">
+            <h2>Nach Partei</h2>
+            <SfDropDownList TValue="string" Placeholder="Partei ..." TItem="PartyElectionResults"
+            DataSource="State.Value.ResultByParty">
+                <DropDownListFieldSettings Value="PartyName"></DropDownListFieldSettings>
+                <DropDownListEvents TValue="string" TItem="PartyElectionResults" ValueChange="OnSelectedPartyChanged"></DropDownListEvents>
+            </SfDropDownList>
+            @if (State.Value.SelectedParty is not null)
+            {
+                <SfChart>
+                    <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                    <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@PollingStationPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                        </ChartSeries>
+                    </ChartSeriesCollection>
+                    <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                    </ChartPrimaryYAxis>
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Wahllokal">
+                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                    </ChartPrimaryXAxis>
+                </SfChart>
+                <SfChart CustomClass="mt-4">
+                    <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                    <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@PostalPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                        </ChartSeries>
+                    </ChartSeriesCollection>
+                    <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                    </ChartPrimaryYAxis>
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Briefwahlbezirk">
+                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                    </ChartPrimaryXAxis>
+                </SfChart>
+            }
+        </div>
     </div>
 }
 
@@ -137,6 +178,12 @@
     public IReadOnlyCollection<PartyElectionResult> PostalDistrictResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
         ? State.Value.SelectedPostalDistrict!.FirstVote
         : State.Value.SelectedPostalDistrict!.SecondVote;
+    public IReadOnlyCollection<DistrictPartyResult> PollingStationPartyResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+        ? State.Value.SelectedParty!.PollingStationFirstVotes
+        : State.Value.SelectedParty!.PollingStationSecondVotes;
+    public IReadOnlyCollection<DistrictPartyResult> PostalPartyResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+        ? State.Value.SelectedParty!.PostalFirstVotes
+        : State.Value.SelectedParty!.PostalSecondVotes;
 
     protected override void OnInitialized()
     {
@@ -161,6 +208,11 @@
         Dispatcher.Dispatch(new SelectedPostalDistrictChangedAction(args.ItemData));
     }
 
+    private void OnSelectedPartyChanged(ChangeEventArgs<string, PartyElectionResults> args)
+    {
+        Dispatcher.Dispatch(new SelectedPartyChangedAction(args.ItemData));
+    }
+
     private int _i = 0;
     public void PointRenderEvent(PointRenderEventArgs args)
     {
@@ -169,5 +221,10 @@
 
         args.Fill = PartyColors.Values.ElementAt(_i);
         _i++;
+    }
+
+    public void OnPartyRender(SeriesRenderEventArgs args)
+    {
+        args.Fill = "#789ded";
     }
 }

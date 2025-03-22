@@ -52,7 +52,7 @@ public class CsvReader : ICsvReader
 
     public async Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async()
     {
-        var postalVotePattern = @"^\d+ - Brief";
+        var postalVotePattern = @"^\d+ - Brief ";
         var regularVotePattern = @"^\d+ - ";
 
         var partyList = new Dictionary<string, string>()

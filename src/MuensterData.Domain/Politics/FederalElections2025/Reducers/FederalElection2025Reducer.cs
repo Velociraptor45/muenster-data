@@ -22,7 +22,8 @@ public static class FederalElection2025Reducer
     {
         return state with
         {
-            Results = action.Results
+            Results = action.Results,
+            ResultByParty = action.ResultByParty,
         };
     }
 
@@ -55,6 +56,16 @@ public static class FederalElection2025Reducer
         return state with
         {
             SelectedPostalDistrict = action.PostalDistrict
+        };
+    }
+
+    [ReducerMethod]
+    public static FederalElection2025State SelectedPartyChanged(FederalElection2025State state,
+        SelectedPartyChangedAction action)
+    {
+        return state with
+        {
+            SelectedParty = action.Party
         };
     }
 }
