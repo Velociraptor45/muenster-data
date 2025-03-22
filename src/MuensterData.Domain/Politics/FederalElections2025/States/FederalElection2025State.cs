@@ -6,7 +6,13 @@ namespace MuensterData.Domain.Politics.FederalElections2025.States;
 public record FederalElection2025State(
     object? ConstituencyPolygonMap,
     IReadOnlyCollection<ConstituencyElectionResult> Results,
-    ConstituencyMapSettings ConstituencyMapSettings);
+    ConstituencyMapSettings ConstituencyMapSettings,
+    ConstituencyElectionResult? SelectedPollingStation,
+    ConstituencyElectionResult? SelectedPostalDistrict)
+{
+    public IReadOnlyCollection<ConstituencyElectionResult> PostalResults => Results.Where(r => r.IsPostal).ToArray();
+    public IReadOnlyCollection<ConstituencyElectionResult> PollingStationResults => Results.Where(r => !r.IsPostal).ToArray();
+}
 
 public class FederalElection2025FeatureState : Feature<FederalElection2025State>
 {
@@ -19,6 +25,8 @@ public class FederalElection2025FeatureState : Feature<FederalElection2025State>
         return new FederalElection2025State(
             null,
             [],
-            new ConstituencyMapSettings(false));
+            new ConstituencyMapSettings(false),
+            null,
+            null);
     }
 }

@@ -37,4 +37,24 @@ public static class FederalElection2025Reducer
             }
         };
     }
+
+    [ReducerMethod]
+    public static FederalElection2025State OnSelectedPollingStationChanged(FederalElection2025State state,
+        SelectedPollingStationChangedAction action)
+    {
+        return state with
+        {
+            SelectedPollingStation = action.PollingStation
+        };
+    }
+
+    [ReducerMethod]
+    public static FederalElection2025State SelectedPostalDistrictChanged(FederalElection2025State state,
+        SelectedPostalDistrictChangedAction action)
+    {
+        return state with
+        {
+            SelectedPostalDistrict = action.PostalDistrict
+        };
+    }
 }

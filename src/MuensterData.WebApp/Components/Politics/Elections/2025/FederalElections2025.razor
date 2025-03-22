@@ -6,6 +6,8 @@
 @using MuensterData.Domain.Politics.States
 @using Syncfusion.Blazor.Maps
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Charts
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
@@ -17,39 +19,124 @@
     <div>
         <div>
             <SfSwitch TChecked="bool"
-                      Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
-                      OnLabel="Erststimme"
-                      OffLabel="Zweitstimme"
-                      CssClass="vote-class-toggle"
-                      ValueChange="OnVoteCategoryToggled">
+            Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
+            OnLabel="Erststimme"
+            OffLabel="Zweitstimme"
+            CssClass="vote-class-toggle"
+            ValueChange="OnVoteCategoryToggled">
             </SfSwitch>
         </div>
-        <SfMaps>
+        <SfMaps @ref="_map">
             <MapsAreaSettings Background="transparent"/>
             <MapsLayers>
                 <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
-                           DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
+                DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
                     <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
                         <MapsShapeColorMappings>
-                            <MapsShapeColorMapping Value="SPD" Color='new[] { "#c93229" }'/>
-                            <MapsShapeColorMapping Value="CDU" Color='new[] { "#73655e" }'/>
-                            <MapsShapeColorMapping Value="GRÜNE" Color='new[] { "#64ad44" }'/>
-                            <MapsShapeColorMapping Value="FDP" Color='new[] { "#f0bf1e" }'/>
-                            <MapsShapeColorMapping Value="AfD" Color='new[] { "#459fe6" }'/>
-                            <MapsShapeColorMapping Value="Linke" Color='new[] { "#a250a6" }'/>
-                            <MapsShapeColorMapping Value="BSW" Color='new[] { "#8c1c55" }'/>
+                            <MapsShapeColorMapping Value="SPD" Color='new[] { PartyColors["SPD"] }' />
+                            <MapsShapeColorMapping Value="CDU" Color='new[] { PartyColors["CDU"] }'/>
+                            <MapsShapeColorMapping Value="GRÜNE" Color='new[] { PartyColors["GRÜNE"] }'/>
+                            <MapsShapeColorMapping Value="FDP" Color='new[] { PartyColors["FDP"] }'/>
+                            <MapsShapeColorMapping Value="AfD" Color='new[] { PartyColors["AfD"] }'/>
+                            <MapsShapeColorMapping Value="Linke" Color='new[] { PartyColors["Linke"] }'/>
+                            <MapsShapeColorMapping Value="BSW" Color='new[] { PartyColors["BSW"] }'/>
                         </MapsShapeColorMappings>
                     </MapsShapeSettings>
+                    <MapsLayerSelectionSettings Enable="true">
+                        <MapsLayerSelectionBorder Color="white" Width="2"></MapsLayerSelectionBorder>
+                    </MapsLayerSelectionSettings>
                 </MapsLayer>
             </MapsLayers>
             <MapsZoomSettings Enable="true"/>
             <MapsLegendSettings Visible="true"/>
         </SfMaps>
+        <div class="pt-2">
+            <h2>Nach Gebiet</h2>
+            <div>
+                <h3>Wahllokal</h3>
+                <SfDropDownList TValue="string" Placeholder="Wahllokal ..." TItem="ConstituencyElectionResult"
+                DataSource="State.Value.PollingStationResults" SortOrder="SortOrder.Ascending">
+                    <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPollingStationChanged"></DropDownListEvents>
+                </SfDropDownList>
+                @if (State.Value.SelectedPollingStation is not null)
+                {
+                    <SfChart>
+                        <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@PollingStationResult" 
+                            XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                                <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
+                            </ChartSeries>
+                        </ChartSeriesCollection>
+                        <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                            <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                        </ChartPrimaryYAxis>
+                    </SfChart>
+                }
+            </div>
+            <div class="pt-2">
+                <h3>Briefwahl</h3>
+                <SfDropDownList TValue="string" Placeholder="Briefwahl-Bezirk ..." TItem="ConstituencyElectionResult"
+                DataSource="State.Value.PostalResults" SortOrder="SortOrder.Ascending">
+                    <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPostalDistrictChanged"></DropDownListEvents>
+                </SfDropDownList>
+                @if (State.Value.SelectedPostalDistrict is not null)
+                {
+                    <SfChart>
+                        <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@PostalDistrictResult"
+                            XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                            </ChartSeries>
+                        </ChartSeriesCollection>
+                        <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                            <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                        </ChartPrimaryYAxis>
+                    </SfChart>
+                }
+            </div>
+        </div>
     </div>
 }
 
 @code {
+    public Dictionary<string, string> PartyColors = new()
+    {
+        { "SPD", "#c93229" },
+        { "CDU", "#73655e" },
+        { "GRÜNE", "#64ad44" },
+        { "FDP", "#f0bf1e" },
+        { "AfD", "#459fe6" },
+        { "Linke", "#a250a6" },
+        { "PARTEI MENSCH UMWELT TIERSCHUTZ", "#789ded"},
+        { "Partei für Arbeit, Rechtsstaat, Tierschutz, Elitenförderung und basisdemokratische Initiative", "#789ded"},
+        { "Basisdemokratische Partei Deutschland", "#789ded"},
+        { "Die Gerechtigkeitspartei – Team Todenhöfer", "#789ded"},
+        { "FREIE WÄHLER", "#789ded"},
+        { "Volt Deutschland", "#502379"},
+        { "Marxistisch-Leninistische Partei Deutschlands", "#789ded"},
+        { "Partei des Fortschritts", "#789ded"},
+        { "BÜNDNIS DEUTSCHLAND", "#789ded"},
+        { "BSW", "#8c1c55" },
+        { "MERA25 - Gemeinsam für Europäische Unabhängigkeit", "#789ded"},
+        { "WerteUnion", "#789ded"}
+    };
+
+    SfMaps? _map;
     public string ColorPath => State.Value.ConstituencyMapSettings.ShowFirstVotes ? "WinnerFirstVote" : "WinnerSecondVote";
+
+    public IReadOnlyCollection<PartyElectionResult> PollingStationResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+        ? State.Value.SelectedPollingStation!.FirstVote
+        : State.Value.SelectedPollingStation!.SecondVote;
+    public IReadOnlyCollection<PartyElectionResult> PostalDistrictResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+        ? State.Value.SelectedPostalDistrict!.FirstVote
+        : State.Value.SelectedPostalDistrict!.SecondVote;
 
     protected override void OnInitialized()
     {
@@ -61,5 +148,26 @@
     private void OnVoteCategoryToggled()
     {
         Dispatcher.Dispatch(new ToggleVoteCategoryAction());
+    }
+
+    private void OnSelectedPollingStationChanged(ChangeEventArgs<string, ConstituencyElectionResult> args)
+    {
+        _map!.ShapeSelectionAsync(0, "BLOWAST_ID", args.ItemData.Id, true);
+        Dispatcher.Dispatch(new SelectedPollingStationChangedAction(args.ItemData));
+    }
+
+    private void OnSelectedPostalDistrictChanged(ChangeEventArgs<string, ConstituencyElectionResult> args)
+    {
+        Dispatcher.Dispatch(new SelectedPostalDistrictChangedAction(args.ItemData));
+    }
+
+    private int _i = 0;
+    public void PointRenderEvent(PointRenderEventArgs args)
+    {
+        if (_i >= 18)
+            _i = 0;
+
+        args.Fill = PartyColors.Values.ElementAt(_i);
+        _i++;
     }
 }

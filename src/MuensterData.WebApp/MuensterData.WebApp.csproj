@@ -9,12 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="28.1.37" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="28.1.37" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="28.1.37" />
-    <PackageReference Include="Syncfusion.Blazor.Maps" Version="28.1.37" />
-    <PackageReference Include="Syncfusion.Blazor.Popups" Version="28.1.37" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.1.37" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Maps" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="28.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.12" />
   </ItemGroup>
 
   <ItemGroup>

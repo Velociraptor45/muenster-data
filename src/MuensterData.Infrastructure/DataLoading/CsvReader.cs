@@ -52,6 +52,9 @@ public class CsvReader : ICsvReader
 
     public async Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async()
     {
+        var postalVotePattern = @"^\d+ - Brief";
+        var regularVotePattern = @"^\d+ - ";
+
         var partyList = new Dictionary<string, string>()
         {
             {"D1", "SPD"},
@@ -128,7 +131,18 @@ public class CsvReader : ICsvReader
                 }
             }
 
-            list.Add(new ConstituencyElectionResult(id, constituencyName, firstVotes, secondVotes));
+            bool isPostalVote = false;
+            if (Regex.IsMatch(constituencyName, postalVotePattern))
+            {
+                isPostalVote = true;
+                constituencyName = Regex.Replace(constituencyName, postalVotePattern, string.Empty);
+            }
+            else
+            {
+                constituencyName = Regex.Replace(constituencyName, regularVotePattern, string.Empty);
+            }
+
+            list.Add(new ConstituencyElectionResult(id, constituencyName, isPostalVote, firstVotes, secondVotes));
         }
         return list;
     }
