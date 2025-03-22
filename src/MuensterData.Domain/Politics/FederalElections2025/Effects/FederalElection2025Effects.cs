@@ -75,6 +75,24 @@ public class FederalElection2025Effects
             resultsByParty.Add(new PartyElectionResults(partyName, firstVotes, secondVotes, postalFirstVotes, postalSecondVotes));
         }
 
-        dispatcher.Dispatch(new ElectionResultsLoadedAction(electionResults, resultsByParty));
+        var totalFirstVotes = electionResults.Sum(x => x.FirstVote.Sum(y => y.Votes));
+        var totalSecondVotes = electionResults.Sum(x => x.SecondVote.Sum(y => y.Votes));
+
+        var overallPartyResultsFirstVote = new List<OverallPartyResult>();
+        var overallPartyResultsSecondVote = new List<OverallPartyResult>();
+        foreach (var partyName in dict.Keys)
+        {
+            var partyFirstVotes = dict[partyName].Item1.Sum(x => x.Votes) + postalDict[partyName].Item1.Sum(x => x.Votes);
+            var percentageFirstVotes = (decimal)partyFirstVotes / totalFirstVotes * 100;
+            overallPartyResultsFirstVote.Add(new OverallPartyResult(partyName, percentageFirstVotes));
+
+            var partySecondVotes = dict[partyName].Item2.Sum(x => x.Votes) + postalDict[partyName].Item2.Sum(x => x.Votes);
+            var percentageSecondVotes = (decimal)partySecondVotes / totalSecondVotes * 100;
+            overallPartyResultsSecondVote.Add(new OverallPartyResult(partyName, percentageSecondVotes));
+        }
+
+        var overallResult = new OverallResult(overallPartyResultsFirstVote, overallPartyResultsSecondVote);
+
+        dispatcher.Dispatch(new ElectionResultsLoadedAction(electionResults, resultsByParty, overallResult));
     }
 }

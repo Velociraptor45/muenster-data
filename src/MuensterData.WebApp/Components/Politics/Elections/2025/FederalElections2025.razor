@@ -32,7 +32,7 @@
             <MapsAreaSettings Background="transparent"/>
             <MapsLayers>
                 <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
-                DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
+                           DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
                     <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
                         <MapsShapeColorMappings>
                             <MapsShapeColorMapping Value="SPD" Color='new[] { PartyColors["SPD"] }' />
@@ -52,7 +52,23 @@
             <MapsZoomSettings Enable="true"/>
             <MapsLegendSettings Visible="true"/>
         </SfMaps>
-        <div class="pt-2">
+        <div class="pt-4">
+            <SfChart>
+                <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                <ChartSeriesCollection>
+                    <ChartSeries DataSource="@OverallResult"
+                                 XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
+                        <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
+                    </ChartSeries>
+                </ChartSeriesCollection>
+                <ChartPrimaryYAxis Title="Anteil Stimmen">
+                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                </ChartPrimaryYAxis>
+            </SfChart>
+        </div>
+        <div class="pt-4">
             <h2>Nach Gebiet</h2>
             <div>
                 <h3>Wahllokal</h3>
@@ -172,6 +188,9 @@
     SfMaps? _map;
     public string ColorPath => State.Value.ConstituencyMapSettings.ShowFirstVotes ? "WinnerFirstVote" : "WinnerSecondVote";
 
+    public IReadOnlyCollection<OverallPartyResult> OverallResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+        ? State.Value.OverallResult.FirstVoteResults
+        : State.Value.OverallResult.SecondVoteResults;
     public IReadOnlyCollection<PartyElectionResult> PollingStationResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
         ? State.Value.SelectedPollingStation!.FirstVote
         : State.Value.SelectedPollingStation!.SecondVote;
