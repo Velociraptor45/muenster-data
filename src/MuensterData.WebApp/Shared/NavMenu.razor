@@ -1,7 +1,10 @@
-﻿<div id="top-bar">
+﻿@inject NavigationManager NavigationManager
+
+<div id="top-bar">
     <button type="button" class="toggler" @onclick="ToggleNavMenu">
         <i class="bi bi-list"></i>
     </button>
+    <div class="ms-2 home-link" @onclick="OnHomeLinkClicked">data-münster.de</div>
 </div>
 
 <div id="sidebarMenu" class="@NavMenuCssClass">
@@ -14,6 +17,10 @@
             <NavLink class="nav-link pt-3" href="traffic" Match="NavLinkMatch.All" @onclick="NavigationClicked">
                 <i class="bi bi-stoplights"></i>
                 <i class="bi bi-stoplights-fill"></i> Verkehr
+            </NavLink>
+            <NavLink class="nav-link pt-3" href="politics" Match="NavLinkMatch.All" @onclick="NavigationClicked">
+                <i class="bi bi-signpost-split"></i>
+                <i class="bi bi-signpost-split-fill"></i> Politik
             </NavLink>
             <NavLink class="nav-link pt-3" href="about" Match="NavLinkMatch.All" @onclick="NavigationClicked">
                 <i class="bi bi-info-circle"></i>
@@ -36,5 +43,10 @@
     private void NavigationClicked()
     {
         _collapseNavMenu = true;
+    }
+
+    private void OnHomeLinkClicked()
+    {
+        NavigationManager.NavigateTo(string.Empty);
     }
 }

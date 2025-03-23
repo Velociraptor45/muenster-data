@@ -12,6 +12,8 @@
     top: 0;
     z-index: 1000;
     border-bottom: 0.5px solid rgba(var(--border-color));
+    display: flex;
+    align-items: center;
 }
 
 .toggler:hover {
@@ -26,8 +28,11 @@
     font-size: 1.7em;
 }
 
+.home-link {
+    color: rgba(var(--primary-text-color));
+    cursor: pointer;
+}
 /* sidebar */
-
 #sidebarMenu {
     background-color: rgba(var(--sidebar-background-color));
     height: 100%;
@@ -63,6 +68,8 @@
 .nav-link.active .bi-house,
 .nav-link:hover .bi-stoplights,
 .nav-link.active .bi-stoplights,
+.nav-link:hover .bi-signpost-split,
+.nav-link.active .bi-signpost-split,
 .nav-link:hover .bi-info-circle,
 .nav-link.active .bi-info-circle {
     display: none;
@@ -72,6 +79,8 @@
 .nav-link.active .bi-house-fill,
 .nav-link:hover .bi-stoplights-fill,
 .nav-link.active .bi-stoplights-fill,
+.nav-link:hover .bi-signpost-split-fill,
+.nav-link.active .bi-signpost-split-fill,
 .nav-link:hover .bi-info-circle-fill,
 .nav-link.active .bi-info-circle-fill {
     display: inline;
@@ -79,6 +88,7 @@
 
 .bi-house-fill,
 .bi-stoplights-fill,
+.bi-signpost-split-fill,
 .bi-info-circle-fill {
     display: none;
 }

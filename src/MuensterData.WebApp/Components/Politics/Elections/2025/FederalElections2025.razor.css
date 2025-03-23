@@ -1,3 +1,63 @@
 ﻿::deep .vote-class-toggle {
     width: 110px;
 }
+
+h2 {
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 21px;
+}
+
+hr {
+    margin-bottom: 0;
+}
+
+.global-settings {
+    position: sticky;
+    top: 41.8px;
+    z-index: 999;
+    width: calc(100% + 1px);
+    background-color: rgba(var(--main-background-color));
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.diagram-box {
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid white;
+    border-radius: 1%;
+    width: 100%;
+}
+
+@media (min-width: 769px) {
+    .page-section {
+        display: flex;
+        padding-top: 16px;
+    }
+
+        .page-section h2 {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            margin-top: 8px;
+            margin-left: 0;
+            margin-bottom: 0;
+            position: sticky;
+            top: calc(41.8px + 78px);
+            height: 190px;
+        }
+
+    .diagram-box {
+        margin-top: 0;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .page-section {
+        margin-top: 16px;
+    }
+}

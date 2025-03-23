@@ -8,159 +8,189 @@
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Charts
-@using Syncfusion.Blazor.Data
 @using SortOrder = Syncfusion.Blazor.DropDowns.SortOrder
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
 
-<h1>Bundestagswahl 2025</h1>
+<div class="pt-2">
+    <h1>Bundestagswahl 2025</h1>
+</div>
+<div>
+    <div class="global-settings">
+        <div class="pb-2 fw-bold">Einstellungen</div>
+        <SfSwitch TChecked="bool"
+                  Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
+                  OnLabel="Erststimme"
+                  OffLabel="Zweitstimme"
+                  CssClass="vote-class-toggle"
+                  ValueChange="OnVoteCategoryToggled">
+        </SfSwitch>
+    </div>
 
-@if (State.Value.ConstituencyPolygonMap is not null)
-{
-    <div>
+    @if (State.Value.ConstituencyPolygonMap is not null)
+    {
         <div>
-            <SfSwitch TChecked="bool"
-            Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
-            OnLabel="Erststimme"
-            OffLabel="Zweitstimme"
-            CssClass="vote-class-toggle"
-            ValueChange="OnVoteCategoryToggled">
-            </SfSwitch>
-        </div>
-        <SfMaps @ref="_map">
-            <MapsAreaSettings Background="transparent"/>
-            <MapsLayers>
-                <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
-                           DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
-                    <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
-                        <MapsShapeColorMappings>
-                            <MapsShapeColorMapping Value="SPD" Color='new[] { PartyColors["SPD"] }' />
-                            <MapsShapeColorMapping Value="CDU" Color='new[] { PartyColors["CDU"] }'/>
-                            <MapsShapeColorMapping Value="GRÜNE" Color='new[] { PartyColors["GRÜNE"] }'/>
-                            <MapsShapeColorMapping Value="FDP" Color='new[] { PartyColors["FDP"] }'/>
-                            <MapsShapeColorMapping Value="AfD" Color='new[] { PartyColors["AfD"] }'/>
-                            <MapsShapeColorMapping Value="Linke" Color='new[] { PartyColors["Linke"] }'/>
-                            <MapsShapeColorMapping Value="BSW" Color='new[] { PartyColors["BSW"] }'/>
-                        </MapsShapeColorMappings>
-                    </MapsShapeSettings>
-                    <MapsLayerSelectionSettings Enable="true">
-                        <MapsLayerSelectionBorder Color="white" Width="2"></MapsLayerSelectionBorder>
-                    </MapsLayerSelectionSettings>
-                </MapsLayer>
-            </MapsLayers>
-            <MapsZoomSettings Enable="true"/>
-            <MapsLegendSettings Visible="true"/>
-        </SfMaps>
-        <div class="pt-4">
-            <SfChart>
-                <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
-                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
-                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-                <ChartSeriesCollection>
-                    <ChartSeries DataSource="@OverallResult"
-                                 XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
-                        <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
-                    </ChartSeries>
-                </ChartSeriesCollection>
-                <ChartPrimaryYAxis Title="Anteil Stimmen">
-                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                </ChartPrimaryYAxis>
-            </SfChart>
-        </div>
-        <div class="pt-4">
-            <h2>Nach Gebiet</h2>
-            <div>
-                <h3>Wahllokal</h3>
-                <SfDropDownList TValue="string" Placeholder="Wahllokal ..." TItem="ConstituencyElectionResult"
-                DataSource="State.Value.PollingStationResults" SortOrder="SortOrder.Ascending">
-                    <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
-                    <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPollingStationChanged"></DropDownListEvents>
-                </SfDropDownList>
-                @if (State.Value.SelectedPollingStation is not null)
-                {
+            <div class="pb-2 pt-2">
+                <h2>Gesamtergebnis</h2>
+                <div>
                     <SfChart>
                         <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
                         <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                         <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                         <ChartSeriesCollection>
-                            <ChartSeries DataSource="@PollingStationResult" 
-                            XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                            <ChartSeries DataSource="@OverallResult"
+                                         XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
                                 <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
                             </ChartSeries>
                         </ChartSeriesCollection>
-                        <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                        <ChartPrimaryYAxis Title="Anteil Stimmen">
                             <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
                         </ChartPrimaryYAxis>
                     </SfChart>
-                }
+                </div>
             </div>
-            <div class="pt-2">
-                <h3>Briefwahl</h3>
-                <SfDropDownList TValue="string" Placeholder="Briefwahl-Bezirk ..." TItem="ConstituencyElectionResult"
-                DataSource="State.Value.PostalResults" SortOrder="SortOrder.Ascending">
-                    <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
-                    <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPostalDistrictChanged"></DropDownListEvents>
-                </SfDropDownList>
-                @if (State.Value.SelectedPostalDistrict is not null)
-                {
-                    <SfChart>
-                        <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
-                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
-                        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-                        <ChartSeriesCollection>
-                            <ChartSeries DataSource="@PostalDistrictResult"
-                            XName="Name" YName="Votes" Type="ChartSeriesType.Column">
-                            </ChartSeries>
-                        </ChartSeriesCollection>
-                        <ChartPrimaryYAxis Title="Anzahl Stimmen">
-                            <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                        </ChartPrimaryYAxis>
-                    </SfChart>
-                }
+            <hr />
+            <div class="pb-2 page-section">
+                <h2>Nach Gebiet</h2>
+                <div class="w-100 mt-2">
+                    <div class="pt-4 diagram-box">
+                        <h3>Wahllokal</h3>
+                        <div>
+                            <SfDropDownList TValue="string" Placeholder="Wahllokal ..." TItem="ConstituencyElectionResult"
+                                            DataSource="State.Value.PollingStationResults" SortOrder="SortOrder.Ascending">
+                                <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
+                                <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPollingStationChanged"></DropDownListEvents>
+                            </SfDropDownList>
+                        </div>
+                        <SfChart>
+                            <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                            <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                            @if (State.Value.SelectedPollingStation is not null)
+                            {
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="@PollingStationResult"
+                                                 XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                                        <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                            }
+                            <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                                <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                            </ChartPrimaryYAxis>
+                        </SfChart>
+                        <div>
+                            <SfMaps @ref="_map">
+                                <MapsAreaSettings Background="transparent"/>
+                                <MapsLayers>
+                                    <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
+                                               DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
+                                        <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
+                                            <MapsShapeColorMappings>
+                                                <MapsShapeColorMapping Value="SPD" Color='new[] { PartyColors["SPD"] }'/>
+                                                <MapsShapeColorMapping Value="CDU" Color='new[] { PartyColors["CDU"] }'/>
+                                                <MapsShapeColorMapping Value="GRÜNE" Color='new[] { PartyColors["GRÜNE"] }'/>
+                                                <MapsShapeColorMapping Value="FDP" Color='new[] { PartyColors["FDP"] }'/>
+                                                <MapsShapeColorMapping Value="AfD" Color='new[] { PartyColors["AfD"] }'/>
+                                                <MapsShapeColorMapping Value="Linke" Color='new[] { PartyColors["Linke"] }'/>
+                                                <MapsShapeColorMapping Value="BSW" Color='new[] { PartyColors["BSW"] }'/>
+                                            </MapsShapeColorMappings>
+                                        </MapsShapeSettings>
+                                        <MapsLayerSelectionSettings Enable="true">
+                                            <MapsLayerSelectionBorder Color="white" Width="2"></MapsLayerSelectionBorder>
+                                        </MapsLayerSelectionSettings>
+                                        <MapsLayerTooltipSettings Visible="true" ValuePath="Name"></MapsLayerTooltipSettings>
+                                    </MapsLayer>
+                                </MapsLayers>
+                                <MapsZoomSettings Enable="true"/>
+                                <MapsLegendSettings Visible="true"/>
+                            </SfMaps>
+                        </div>
+                    </div>
+                    <div class="pt-2 diagram-box mb-0">
+                        <h3>Briefwahl</h3>
+                        <SfDropDownList TValue="string" Placeholder="Briefwahl-Bezirk ..." TItem="ConstituencyElectionResult"
+                                        DataSource="State.Value.PostalResults" SortOrder="SortOrder.Ascending">
+                            <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
+                            <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPostalDistrictChanged"></DropDownListEvents>
+                        </SfDropDownList>
+                        <SfChart>
+                            <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                            <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                            @if (State.Value.SelectedPostalDistrict is not null)
+                            {
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="@PostalDistrictResult"
+                                                 XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                            }
+                            <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                                <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
+                            </ChartPrimaryYAxis>
+                        </SfChart>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <div class="page-section">
+                <h2>Nach Partei</h2>
+                <div class="w-100 mt-2">
+                    <div class="diagram-box">
+                        <SfDropDownList TValue="string" Placeholder="Partei ..." TItem="PartyElectionResults"
+                                        DataSource="State.Value.ResultByParty">
+                            <DropDownListFieldSettings Value="PartyName"></DropDownListFieldSettings>
+                            <DropDownListEvents TValue="string" TItem="PartyElectionResults" ValueChange="OnSelectedPartyChanged"></DropDownListEvents>
+                        </SfDropDownList>
+                        <div class="mt-4">
+                            <h3>Top 15 Wahllokale</h3>
+                            <SfChart>
+                                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+                                @if (State.Value.SelectedParty is not null)
+                                {
+                                    <ChartSeriesCollection>
+                                        <ChartSeries DataSource="@PollingStationPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                }
+                                <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryYAxis>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Wahllokal">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryXAxis>
+                            </SfChart>
+                        </div>
+                        <div class="mt-4">
+                            <h3>Top 15 Briefwahl-Bezirke</h3>
+                            <SfChart>
+                                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+                    
+                                @if (State.Value.SelectedParty is not null)
+                                {
+                                    <ChartSeriesCollection>
+                                        <ChartSeries DataSource="@PostalPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                }
+                                <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryYAxis>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Briefwahlbezirk">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryXAxis>
+                            </SfChart>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="pt-2">
-            <h2>Nach Partei</h2>
-            <SfDropDownList TValue="string" Placeholder="Partei ..." TItem="PartyElectionResults"
-            DataSource="State.Value.ResultByParty">
-                <DropDownListFieldSettings Value="PartyName"></DropDownListFieldSettings>
-                <DropDownListEvents TValue="string" TItem="PartyElectionResults" ValueChange="OnSelectedPartyChanged"></DropDownListEvents>
-            </SfDropDownList>
-            @if (State.Value.SelectedParty is not null)
-            {
-                <SfChart>
-                    <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-                    <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
-                    <ChartSeriesCollection>
-                        <ChartSeries DataSource="@PollingStationPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
-                        </ChartSeries>
-                    </ChartSeriesCollection>
-                    <ChartPrimaryYAxis Title="Anzahl Stimmen">
-                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                    </ChartPrimaryYAxis>
-                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Wahllokal">
-                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                    </ChartPrimaryXAxis>
-                </SfChart>
-                <SfChart CustomClass="mt-4">
-                    <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-                    <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
-                    <ChartSeriesCollection>
-                        <ChartSeries DataSource="@PostalPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
-                        </ChartSeries>
-                    </ChartSeriesCollection>
-                    <ChartPrimaryYAxis Title="Anzahl Stimmen">
-                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                    </ChartPrimaryYAxis>
-                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Briefwahlbezirk">
-                        <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                    </ChartPrimaryXAxis>
-                </SfChart>
-            }
-        </div>
-    </div>
-}
+    }
+</div>
 
 @code {
     public Dictionary<string, string> PartyColors = new()
@@ -244,6 +274,6 @@
 
     public void OnPartyRender(SeriesRenderEventArgs args)
     {
-        args.Fill = "#789ded";
+        args.Fill = "#007a99";
     }
 }
