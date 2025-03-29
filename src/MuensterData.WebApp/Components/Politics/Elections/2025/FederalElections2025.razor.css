@@ -27,7 +27,6 @@ hr {
 .diagram-box {
     padding: 20px;
     margin-top: 20px;
-    margin-bottom: 20px;
     border: 1px solid white;
     border-radius: 1%;
     width: 100%;
@@ -47,9 +46,19 @@ hr {
             margin-bottom: 0;
             position: sticky;
             top: calc(41.8px + 78px);
+        }
+
+        .page-section #area {
             height: 190px;
         }
 
+        .page-section #totalArea {
+            height: 250px;
+        }
+
+        .page-section #postal {
+            height: 180px;
+        }
     .diagram-box {
         margin-top: 0;
     }

@@ -4,11 +4,13 @@
 @using MuensterData.Domain.Politics.FederalElections2025.Actions
 @using MuensterData.Domain.Politics.FederalElections2025.States
 @using MuensterData.Domain.Politics.States
+@using Syncfusion.Blazor
 @using Syncfusion.Blazor.Maps
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Charts
 @using SortOrder = Syncfusion.Blazor.DropDowns.SortOrder
+@using Syncfusion.Blazor.Data
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
@@ -20,45 +22,47 @@
     <div class="global-settings">
         <div class="pb-2 fw-bold">Einstellungen</div>
         <SfSwitch TChecked="bool"
-                  Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
-                  OnLabel="Erststimme"
-                  OffLabel="Zweitstimme"
-                  CssClass="vote-class-toggle"
-                  ValueChange="OnVoteCategoryToggled">
+        Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
+        OnLabel="Erststimme"
+        OffLabel="Zweitstimme"
+        CssClass="vote-class-toggle"
+        ValueChange="OnVoteCategoryToggled">
         </SfSwitch>
     </div>
 
     @if (State.Value.ConstituencyPolygonMap is not null)
     {
         <div>
-            <div class="pb-2 pt-2">
-                <h2>Gesamtergebnis</h2>
-                <div>
-                    <SfChart>
-                        <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
-                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
-                        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-                        <ChartSeriesCollection>
-                            <ChartSeries DataSource="@OverallResult"
-                                         XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
-                                <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
-                            </ChartSeries>
-                        </ChartSeriesCollection>
-                        <ChartPrimaryYAxis Title="Anteil Stimmen">
-                            <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far" />
-                        </ChartPrimaryYAxis>
-                    </SfChart>
+            <div class="pt-2 page-section">
+                <h2 id="totalArea">Gesamtergebnis</h2>
+                <div class="w-100 mt-2">
+                    <div class="diagram-box">
+                        <SfChart>
+                            <ChartEvents OnPointRender="PointRenderEvent"></ChartEvents>
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                            <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@OverallResult"
+                                XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
+                                    <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
+                                </ChartSeries>
+                            </ChartSeriesCollection>
+                            <ChartPrimaryYAxis Title="Anteil Stimmen">
+                                <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                            </ChartPrimaryYAxis>
+                        </SfChart>
+                    </div>
                 </div>
             </div>
             <hr />
             <div class="pb-2 page-section">
-                <h2>Nach Gebiet</h2>
+                <h2 id="area">Nach Gebiet</h2>
                 <div class="w-100 mt-2">
-                    <div class="pt-4 diagram-box">
+                    <div class="pt-4 diagram-box mb-4">
                         <h3>Wahllokal</h3>
                         <div>
                             <SfDropDownList TValue="string" Placeholder="Wahllokal ..." TItem="ConstituencyElectionResult"
-                                            DataSource="State.Value.PollingStationResults" SortOrder="SortOrder.Ascending">
+                            DataSource="State.Value.PollingStationResults" SortOrder="SortOrder.Ascending">
                                 <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
                                 <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPollingStationChanged"></DropDownListEvents>
                             </SfDropDownList>
@@ -71,7 +75,7 @@
                             {
                                 <ChartSeriesCollection>
                                     <ChartSeries DataSource="@PollingStationResult"
-                                                 XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                                    XName="Name" YName="Votes" Type="ChartSeriesType.Column">
                                         <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
                                     </ChartSeries>
                                 </ChartSeriesCollection>
@@ -85,7 +89,7 @@
                                 <MapsAreaSettings Background="transparent"/>
                                 <MapsLayers>
                                     <MapsLayer ShapeData="State.Value.ConstituencyPolygonMap" TValue="ConstituencyElectionResult"
-                                               DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
+                                    DataSource="State.Value.Results" ShapeDataPath="Id" ShapePropertyPath='new[] { "BLOWAST_ID" }'>
                                         <MapsShapeSettings Fill="#E5E5E5" ColorValuePath="@ColorPath">
                                             <MapsShapeColorMappings>
                                                 <MapsShapeColorMapping Value="SPD" Color='new[] { PartyColors["SPD"] }'/>
@@ -107,11 +111,28 @@
                                 <MapsLegendSettings Visible="true"/>
                             </SfMaps>
                         </div>
+                        <div>
+                            @if (State.Value.SelectedPollingStation is not null)
+                            {
+                            <SfAccumulationChart Title="Wahlbeteiligung">
+                                <AccumulationChartSeriesCollection>
+                                    <AccumulationChartSeries
+                                    DataSource="State.Value.SelectedPollingStation.Turnout!.FormatForChart"
+                                    XName="Name" YName="Count" Name="Name">
+                                        <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
+                                            <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px" />
+                                        </AccumulationDataLabelSettings>
+                                    </AccumulationChartSeries>
+                                    <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
+                                </AccumulationChartSeriesCollection>
+                            </SfAccumulationChart>
+                            }
+                        </div>
                     </div>
-                    <div class="pt-2 diagram-box mb-0">
+                    <div class="pt-2 diagram-box">
                         <h3>Briefwahl</h3>
                         <SfDropDownList TValue="string" Placeholder="Briefwahl-Bezirk ..." TItem="ConstituencyElectionResult"
-                                        DataSource="State.Value.PostalResults" SortOrder="SortOrder.Ascending">
+                        DataSource="State.Value.PostalResults" SortOrder="SortOrder.Ascending">
                             <DropDownListFieldSettings Value="Name"></DropDownListFieldSettings>
                             <DropDownListEvents TValue="string" TItem="ConstituencyElectionResult" ValueChange="OnSelectedPostalDistrictChanged"></DropDownListEvents>
                         </SfDropDownList>
@@ -123,7 +144,7 @@
                             {
                                 <ChartSeriesCollection>
                                     <ChartSeries DataSource="@PostalDistrictResult"
-                                                 XName="Name" YName="Votes" Type="ChartSeriesType.Column">
+                                    XName="Name" YName="Votes" Type="ChartSeriesType.Column">
                                     </ChartSeries>
                                 </ChartSeriesCollection>
                             }
@@ -136,11 +157,11 @@
             </div>
             <hr/>
             <div class="page-section">
-                <h2>Nach Partei</h2>
+                <h2 id="postal">Nach Partei</h2>
                 <div class="w-100 mt-2">
                     <div class="diagram-box">
                         <SfDropDownList TValue="string" Placeholder="Partei ..." TItem="PartyElectionResults"
-                                        DataSource="State.Value.ResultByParty">
+                        DataSource="State.Value.ResultByParty">
                             <DropDownListFieldSettings Value="PartyName"></DropDownListFieldSettings>
                             <DropDownListEvents TValue="string" TItem="PartyElectionResults" ValueChange="OnSelectedPartyChanged"></DropDownListEvents>
                         </SfDropDownList>
@@ -169,7 +190,7 @@
                             <SfChart>
                                 <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                                 <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
-                    
+
                                 @if (State.Value.SelectedParty is not null)
                                 {
                                     <ChartSeriesCollection>

@@ -6,6 +6,7 @@ namespace MuensterData.Domain.Politics.FederalElections2025.States;
 public record FederalElection2025State(
     object? ConstituencyPolygonMap,
     OverallResult OverallResult,
+    Turnout OverallTurnout,
     IReadOnlyCollection<ConstituencyElectionResult> Results,
     IReadOnlyCollection<PartyElectionResults> ResultByParty,
     ConstituencyMapSettings ConstituencyMapSettings,
@@ -29,6 +30,7 @@ public class FederalElection2025FeatureState : Feature<FederalElection2025State>
         return new FederalElection2025State(
             null,
             new([], []),
+            new(1, 1),
             [],
             [],
             new ConstituencyMapSettings(false),

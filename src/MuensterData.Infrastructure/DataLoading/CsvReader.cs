@@ -101,8 +101,13 @@ public class CsvReader : ICsvReader
 
         var idRowIndex = Array.IndexOf(headlineRow, "gebiet-nr");
         var constituencyNameRowIndex = Array.IndexOf(headlineRow, "gebiet-name");
+        var totalEligibleVotersRowIndex = Array.IndexOf(headlineRow, "A");
+        var pollingStationEligibleVotersRowIndex = Array.IndexOf(headlineRow, "A1");
+        var totalVotersRowIndex = Array.IndexOf(headlineRow, "B");
 
         var list = new List<ConstituencyElectionResult>();
+        var totalEligibleVoters = 0;
+        var totalVoters = 0;
         foreach (var row in rows.Skip(1))
         {
             var columns = row.Split(';');
@@ -115,14 +120,14 @@ public class CsvReader : ICsvReader
             for (int col = 0; col < headlineRow.Length; col++)
             {
                 var content = headlineRow[col];
-                if (Regex.IsMatch(content, @"^D\d+$"))
+                if (IsFirstVote(content))
                 {
                     var partyName = partyList[content];
                     var votes = int.Parse(columns[col]);
                     var firstVoteResults = new PartyElectionResult(partyName, votes);
                     firstVotes.Add(firstVoteResults);
                 }
-                else if (Regex.IsMatch(content, @"^F\d+$"))
+                else if (IsSecondVote(content))
                 {
                     var partyName = partyList[content];
                     var votes = int.Parse(columns[col]);
@@ -132,6 +137,7 @@ public class CsvReader : ICsvReader
             }
 
             bool isPostalVote = false;
+            Turnout? turnout = null;
             if (Regex.IsMatch(constituencyName, postalVotePattern))
             {
                 isPostalVote = true;
@@ -139,12 +145,21 @@ public class CsvReader : ICsvReader
             }
             else
             {
+                totalEligibleVoters += int.Parse(columns[totalEligibleVotersRowIndex]);
+                var pollingStationEligibleVoters = int.Parse(columns[pollingStationEligibleVotersRowIndex]);
+                var voters = int.Parse(columns[totalVotersRowIndex]);
+                totalVoters += voters;
+                turnout = new Turnout(pollingStationEligibleVoters, voters);
+
                 constituencyName = Regex.Replace(constituencyName, regularVotePattern, string.Empty);
             }
 
-            list.Add(new ConstituencyElectionResult(id, constituencyName, isPostalVote, firstVotes, secondVotes));
+            list.Add(new ConstituencyElectionResult(id, constituencyName, isPostalVote, firstVotes, secondVotes, turnout));
         }
         return list;
+
+        bool IsFirstVote(string content) => Regex.IsMatch(content, @"^D\d+$");
+        bool IsSecondVote(string content) => Regex.IsMatch(content, @"^F\d+$");
     }
 
     private static async Task<string[]> GetFileContentAsync(string fileName)
