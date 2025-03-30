@@ -16,7 +16,7 @@ hr {
 
 .global-settings {
     position: sticky;
-    top: 41.8px;
+    top: 41.6px;
     z-index: 999;
     width: calc(100% + 1px);
     background-color: rgba(var(--main-background-color));
@@ -45,7 +45,7 @@ hr {
             margin-left: 0;
             margin-bottom: 0;
             position: sticky;
-            top: calc(41.8px + 78px);
+            top: calc(41.6px + 78px);
         }
 
         .page-section #area {

@@ -4,13 +4,11 @@
 @using MuensterData.Domain.Politics.FederalElections2025.Actions
 @using MuensterData.Domain.Politics.FederalElections2025.States
 @using MuensterData.Domain.Politics.States
-@using Syncfusion.Blazor
 @using Syncfusion.Blazor.Maps
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Charts
 @using SortOrder = Syncfusion.Blazor.DropDowns.SortOrder
-@using Syncfusion.Blazor.Data
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
@@ -55,7 +53,7 @@
                             <AccumulationChartSeriesCollection>
                                 <AccumulationChartSeries
                                     DataSource="State.Value.OverallTurnout.FormatForChart"
-                                    XName="Name" YName="Count" Name="Name">
+                                    XName="Name" YName="Count" Name="Name" PointColorMapping="Fill">
                                     <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
                                         <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px" />
                                     </AccumulationDataLabelSettings>
@@ -128,7 +126,7 @@
                                 <AccumulationChartSeriesCollection>
                                     <AccumulationChartSeries
                                         DataSource="State.Value.SelectedPollingStation?.Turnout!.FormatForChart ?? []"
-                                        XName="Name" YName="Count" Name="Name">
+                                        XName="Name" YName="Count" Name="Name" PointColorMapping="Fill">
                                         <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
                                             <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px" />
                                         </AccumulationDataLabelSettings>
