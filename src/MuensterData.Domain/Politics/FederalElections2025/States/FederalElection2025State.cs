@@ -33,7 +33,7 @@ public class FederalElection2025FeatureState : Feature<FederalElection2025State>
             new(1, 1),
             [],
             [],
-            new ConstituencyMapSettings(false),
+            new ConstituencyMapSettings(false, true),
             null,
             null,
             null);

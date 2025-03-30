@@ -106,11 +106,11 @@ public class FederalElection2025Effects
         {
             var partyFirstVotes = dict[partyName].Item1.Sum(x => x.Votes) + postalDict[partyName].Item1.Sum(x => x.Votes);
             var percentageFirstVotes = (decimal)partyFirstVotes / totalFirstVotes * 100;
-            overallPartyResultsFirstVote.Add(new OverallPartyResult(partyName, percentageFirstVotes));
+            overallPartyResultsFirstVote.Add(new OverallPartyResult(partyName, partyFirstVotes, percentageFirstVotes));
 
             var partySecondVotes = dict[partyName].Item2.Sum(x => x.Votes) + postalDict[partyName].Item2.Sum(x => x.Votes);
             var percentageSecondVotes = (decimal)partySecondVotes / totalSecondVotes * 100;
-            overallPartyResultsSecondVote.Add(new OverallPartyResult(partyName, percentageSecondVotes));
+            overallPartyResultsSecondVote.Add(new OverallPartyResult(partyName, partySecondVotes, percentageSecondVotes));
         }
 
         var overallResult = new OverallResult(overallPartyResultsFirstVote, overallPartyResultsSecondVote);

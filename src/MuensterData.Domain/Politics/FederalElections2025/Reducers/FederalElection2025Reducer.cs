@@ -41,6 +41,18 @@ public static class FederalElection2025Reducer
         };
     }
 
+    [ReducerMethod(typeof(ToggleResultsModeAction))]
+    public static FederalElection2025State OnToggleResultsMode(FederalElection2025State state)
+    {
+        return state with
+        {
+            ConstituencyMapSettings = state.ConstituencyMapSettings with
+            {
+                ShowRelativeResults = !state.ConstituencyMapSettings.ShowRelativeResults
+            }
+        };
+    }
+
     [ReducerMethod]
     public static FederalElection2025State OnSelectedPollingStationChanged(FederalElection2025State state,
         SelectedPollingStationChangedAction action)

@@ -11,6 +11,9 @@ public class CsvReader : ICsvReader
 {
     private static readonly CultureInfo EnglishCulture = new("en-en");
     private const string One = "1";
+    private const string PostalVotePattern = @"^\d+ - Brief ";
+    private const string RegularVotePattern = @"^\d+ - ";
+
 
     public async Task<List<Accident>> LoadAccidentsAsync()
     {
@@ -52,9 +55,6 @@ public class CsvReader : ICsvReader
 
     public async Task<(List<ConstituencyElectionResult>, Turnout)> LoadFederalElectionResults2025Async()
     {
-        var postalVotePattern = @"^\d+ - Brief ";
-        var regularVotePattern = @"^\d+ - ";
-
         var partyList = new Dictionary<string, string>()
         {
             {"D1", "SPD"},
@@ -143,10 +143,10 @@ public class CsvReader : ICsvReader
 
             bool isPostalVote = false;
             Turnout? turnout = null;
-            if (Regex.IsMatch(constituencyName, postalVotePattern))
+            if (Regex.IsMatch(constituencyName, PostalVotePattern))
             {
                 isPostalVote = true;
-                constituencyName = Regex.Replace(constituencyName, postalVotePattern, string.Empty);
+                constituencyName = Regex.Replace(constituencyName, PostalVotePattern, string.Empty);
                 totalVoters += int.Parse(columns[totalVotersRowIndex]);
             }
             else
@@ -157,7 +157,7 @@ public class CsvReader : ICsvReader
                 totalVoters += voters;
                 turnout = new Turnout(pollingStationEligibleVoters, voters);
 
-                constituencyName = Regex.Replace(constituencyName, regularVotePattern, string.Empty);
+                constituencyName = Regex.Replace(constituencyName, RegularVotePattern, string.Empty);
             }
 
             list.Add(new ConstituencyElectionResult(id, constituencyName, isPostalVote, firstVotes, secondVotes, turnout));
