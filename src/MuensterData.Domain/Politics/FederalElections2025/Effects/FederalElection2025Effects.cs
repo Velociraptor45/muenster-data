@@ -1,4 +1,5 @@
 ﻿using Fluxor;
+using Microsoft.Extensions.Caching.Memory;
 using MuensterData.Domain.Common.Ports;
 using MuensterData.Domain.Politics.FederalElections2025.Actions;
 using MuensterData.Domain.Politics.FederalElections2025.States;
@@ -12,11 +13,13 @@ public class FederalElection2025Effects
 {
     private readonly IState<FederalElection2025State> _state;
     private readonly ICsvReader _csvReader;
+    private readonly IMemoryCache _cache;
 
-    public FederalElection2025Effects(IState<FederalElection2025State> state, ICsvReader csvReader)
+    public FederalElection2025Effects(IState<FederalElection2025State> state, ICsvReader csvReader, IMemoryCache cache)
     {
         _state = state;
         _csvReader = csvReader;
+        _cache = cache;
     }
 
     [EffectMethod(typeof(LoadPageAction))]
@@ -25,14 +28,31 @@ public class FederalElection2025Effects
         if (_state.Value.ConstituencyPolygonMap is not null)
             return;
 
-        var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var filePath = Path.Combine(executionDirectory!, "data", "stimmbezirk.geojson");
-        var serializedMap = await File.ReadAllTextAsync(filePath);
-        var constituencyPolygonMap = JsonSerializer.Deserialize<object>(serializedMap)!;
-        dispatcher.Dispatch(new ConstituencyPolygonMapLoadedAction(constituencyPolygonMap));
+        if (_cache.TryGetValue("ConstituencyPolygonMap", out ConstituencyPolygonMapLoadedAction? cachedMapAction))
+        {
+            dispatcher.Dispatch(cachedMapAction);
+        }
+        else
+        {
+            var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var filePath = Path.Combine(executionDirectory!, "data", "stimmbezirk.geojson");
+            var serializedMap = await File.ReadAllTextAsync(filePath);
+            var constituencyPolygonMap = JsonSerializer.Deserialize<object>(serializedMap)!;
+            var mapAction = new ConstituencyPolygonMapLoadedAction(constituencyPolygonMap);
+            _cache.Set("ConstituencyPolygonMap", mapAction);
+            dispatcher.Dispatch(mapAction);
+        }
+
+        if (_cache.TryGetValue("FederalElectionResults2025", out ElectionResultsLoadedAction? cachedResultsAction))
+        {
+            dispatcher.Dispatch(cachedResultsAction);
+            return;
+        }
 
         var (electionResults, overallTurnout) = await _csvReader.LoadFederalElectionResults2025Async();
 
+        // Results are returned with an overview over party results per district
+        // Here we transform the date to district results per party
         var dict = new Dictionary<string, (List<DistrictPartyResult>, List<DistrictPartyResult>)>();
         var postalDict = new Dictionary<string, (List<DistrictPartyResult>, List<DistrictPartyResult>)>();
         foreach (var result in electionResults)
@@ -95,6 +115,8 @@ public class FederalElection2025Effects
 
         var overallResult = new OverallResult(overallPartyResultsFirstVote, overallPartyResultsSecondVote);
 
-        dispatcher.Dispatch(new ElectionResultsLoadedAction(electionResults, resultsByParty, overallResult, overallTurnout));
+        var action = new ElectionResultsLoadedAction(electionResults, resultsByParty, overallResult, overallTurnout);
+        _cache.Set("FederalElectionResults2025", action);
+        dispatcher.Dispatch(action);
     }
 }
