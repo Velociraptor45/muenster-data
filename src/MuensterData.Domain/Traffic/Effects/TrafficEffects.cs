@@ -1,4 +1,5 @@
 ﻿using Fluxor;
+using Microsoft.Extensions.Caching.Memory;
 using MuensterData.Domain.Common.Ports;
 using MuensterData.Domain.Traffic.Actions;
 using MuensterData.Domain.Traffic.Actions.Accidents;
@@ -9,18 +10,28 @@ namespace MuensterData.Domain.Traffic.Effects;
 public class TrafficEffects
 {
     private readonly ICsvReader _csvReader;
+    private readonly IMemoryCache _cache;
 
-    public TrafficEffects(IState<TrafficState> state, ICsvReader csvReader)
+    public TrafficEffects(IState<TrafficState> state, ICsvReader csvReader, IMemoryCache cache)
     {
         _csvReader = csvReader;
+        _cache = cache;
     }
 
     [EffectMethod(typeof(TrafficPageEnteredAction))]
     public async Task HandleTrafficPageEnteredAction(IDispatcher dispatcher)
     {
-        var accidents = await _csvReader.LoadAccidentsAsync();
+        if (_cache.TryGetValue("AccidentsMap", out AllAccidentsLoadedAction? cachedMapAction))
+        {
+            dispatcher.Dispatch(cachedMapAction);
+            return;
+        }
 
-        dispatcher.Dispatch(new AllAccidentsLoadedAction(accidents));
+        var accidents = await _csvReader.LoadAccidentsAsync();
+        var action = new AllAccidentsLoadedAction(accidents);
+
+        _cache.Set("AccidentsMap", action);
+        dispatcher.Dispatch(action);
     }
 
 }
