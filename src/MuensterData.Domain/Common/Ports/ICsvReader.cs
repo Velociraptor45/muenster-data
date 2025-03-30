@@ -5,5 +5,5 @@ namespace MuensterData.Domain.Common.Ports;
 public interface ICsvReader
 {
     Task<List<Accident>> LoadAccidentsAsync();
-    Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async();
+    Task<(List<ConstituencyElectionResult>, Turnout)> LoadFederalElectionResults2025Async();
 }

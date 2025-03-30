@@ -24,7 +24,8 @@ public static class FederalElection2025Reducer
         {
             Results = action.Results,
             ResultByParty = action.ResultByParty,
-            OverallResult = action.OverallResult
+            OverallResult = action.OverallResult,
+            OverallTurnout = action.OverallTurnout
         };
     }
 

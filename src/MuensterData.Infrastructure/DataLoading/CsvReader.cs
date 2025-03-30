@@ -50,7 +50,7 @@ public class CsvReader : ICsvReader
         return list;
     }
 
-    public async Task<List<ConstituencyElectionResult>> LoadFederalElectionResults2025Async()
+    public async Task<(List<ConstituencyElectionResult>, Turnout)> LoadFederalElectionResults2025Async()
     {
         var postalVotePattern = @"^\d+ - Brief ";
         var regularVotePattern = @"^\d+ - ";
@@ -104,6 +104,8 @@ public class CsvReader : ICsvReader
         var totalEligibleVotersRowIndex = Array.IndexOf(headlineRow, "A");
         var pollingStationEligibleVotersRowIndex = Array.IndexOf(headlineRow, "A1");
         var totalVotersRowIndex = Array.IndexOf(headlineRow, "B");
+        var validFirstVotesCountRowIndex = Array.IndexOf(headlineRow, "D");
+        var validSecondVotesCountRowIndex = Array.IndexOf(headlineRow, "F");
 
         var list = new List<ConstituencyElectionResult>();
         var totalEligibleVoters = 0;
@@ -115,6 +117,9 @@ public class CsvReader : ICsvReader
             var id = columns[idRowIndex];
             var constituencyName = columns[constituencyNameRowIndex];
 
+            var validFirstVotesCount = (decimal)int.Parse(columns[validFirstVotesCountRowIndex]);
+            var validSecondVotesCount = (decimal)int.Parse(columns[validSecondVotesCountRowIndex]);
+
             List<PartyElectionResult> firstVotes = [];
             List<PartyElectionResult> secondVotes = [];
             for (int col = 0; col < headlineRow.Length; col++)
@@ -124,14 +129,14 @@ public class CsvReader : ICsvReader
                 {
                     var partyName = partyList[content];
                     var votes = int.Parse(columns[col]);
-                    var firstVoteResults = new PartyElectionResult(partyName, votes);
+                    var firstVoteResults = new PartyElectionResult(partyName, votes, votes / validFirstVotesCount * 100);
                     firstVotes.Add(firstVoteResults);
                 }
                 else if (IsSecondVote(content))
                 {
                     var partyName = partyList[content];
                     var votes = int.Parse(columns[col]);
-                    var secondVoteResults = new PartyElectionResult(partyName, votes);
+                    var secondVoteResults = new PartyElectionResult(partyName, votes, votes / validSecondVotesCount * 100);
                     secondVotes.Add(secondVoteResults);
                 }
             }
@@ -142,6 +147,7 @@ public class CsvReader : ICsvReader
             {
                 isPostalVote = true;
                 constituencyName = Regex.Replace(constituencyName, postalVotePattern, string.Empty);
+                totalVoters += int.Parse(columns[totalVotersRowIndex]);
             }
             else
             {
@@ -156,7 +162,7 @@ public class CsvReader : ICsvReader
 
             list.Add(new ConstituencyElectionResult(id, constituencyName, isPostalVote, firstVotes, secondVotes, turnout));
         }
-        return list;
+        return (list, new Turnout(totalEligibleVoters, totalVoters));
 
         bool IsFirstVote(string content) => Regex.IsMatch(content, @"^D\d+$");
         bool IsSecondVote(string content) => Regex.IsMatch(content, @"^F\d+$");

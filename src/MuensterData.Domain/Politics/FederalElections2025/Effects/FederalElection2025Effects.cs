@@ -31,7 +31,7 @@ public class FederalElection2025Effects
         var constituencyPolygonMap = JsonSerializer.Deserialize<object>(serializedMap)!;
         dispatcher.Dispatch(new ConstituencyPolygonMapLoadedAction(constituencyPolygonMap));
 
-        var electionResults = await _csvReader.LoadFederalElectionResults2025Async();
+        var (electionResults, overallTurnout) = await _csvReader.LoadFederalElectionResults2025Async();
 
         var dict = new Dictionary<string, (List<DistrictPartyResult>, List<DistrictPartyResult>)>();
         var postalDict = new Dictionary<string, (List<DistrictPartyResult>, List<DistrictPartyResult>)>();
@@ -45,10 +45,11 @@ public class FederalElection2025Effects
                     postalDict[firstVoteResult.Name] = ([], []);
                 }
 
+                var districtResult = new DistrictPartyResult(result.Name, firstVoteResult.Votes, firstVoteResult.Percentage);
                 if (result.IsPostal)
-                    postalDict[firstVoteResult.Name].Item1.Add(new DistrictPartyResult(result.Name, firstVoteResult.Votes));
+                    postalDict[firstVoteResult.Name].Item1.Add(districtResult);
                 else
-                    dict[firstVoteResult.Name].Item1.Add(new DistrictPartyResult(result.Name, firstVoteResult.Votes));
+                    dict[firstVoteResult.Name].Item1.Add(districtResult);
             }
             foreach (var secondVoteResult in result.SecondVote)
             {
@@ -58,10 +59,11 @@ public class FederalElection2025Effects
                     postalDict[secondVoteResult.Name] = ([], []);
                 }
 
+                var districtResult = new DistrictPartyResult(result.Name, secondVoteResult.Votes, secondVoteResult.Percentage);
                 if (result.IsPostal)
-                    postalDict[secondVoteResult.Name].Item2.Add(new DistrictPartyResult(result.Name, secondVoteResult.Votes));
+                    postalDict[secondVoteResult.Name].Item2.Add(districtResult);
                 else
-                    dict[secondVoteResult.Name].Item2.Add(new DistrictPartyResult(result.Name, secondVoteResult.Votes));
+                    dict[secondVoteResult.Name].Item2.Add(districtResult);
             }
         }
 
@@ -93,6 +95,6 @@ public class FederalElection2025Effects
 
         var overallResult = new OverallResult(overallPartyResultsFirstVote, overallPartyResultsSecondVote);
 
-        dispatcher.Dispatch(new ElectionResultsLoadedAction(electionResults, resultsByParty, overallResult));
+        dispatcher.Dispatch(new ElectionResultsLoadedAction(electionResults, resultsByParty, overallResult, overallTurnout));
     }
 }

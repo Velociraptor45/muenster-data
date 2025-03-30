@@ -43,7 +43,7 @@
                             <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                             <ChartSeriesCollection>
                                 <ChartSeries DataSource="@OverallResult"
-                                XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
+                                             XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
                                     <ChartEmptyPointSettings Mode="EmptyPointMode.Drop"></ChartEmptyPointSettings>
                                 </ChartSeries>
                             </ChartSeriesCollection>
@@ -51,6 +51,18 @@
                                 <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
                             </ChartPrimaryYAxis>
                         </SfChart>
+                        <SfAccumulationChart Title="Wahlbeteiligung">
+                            <AccumulationChartSeriesCollection>
+                                <AccumulationChartSeries
+                                    DataSource="State.Value.OverallTurnout.FormatForChart"
+                                    XName="Name" YName="Count" Name="Name">
+                                    <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
+                                        <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px" />
+                                    </AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                                <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
+                            </AccumulationChartSeriesCollection>
+                        </SfAccumulationChart>
                     </div>
                 </div>
             </div>
@@ -112,13 +124,11 @@
                             </SfMaps>
                         </div>
                         <div>
-                            @if (State.Value.SelectedPollingStation is not null)
-                            {
                             <SfAccumulationChart Title="Wahlbeteiligung">
                                 <AccumulationChartSeriesCollection>
                                     <AccumulationChartSeries
-                                    DataSource="State.Value.SelectedPollingStation.Turnout!.FormatForChart"
-                                    XName="Name" YName="Count" Name="Name">
+                                        DataSource="State.Value.SelectedPollingStation?.Turnout!.FormatForChart ?? []"
+                                        XName="Name" YName="Count" Name="Name">
                                         <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
                                             <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px" />
                                         </AccumulationDataLabelSettings>
@@ -126,7 +136,6 @@
                                     <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
                                 </AccumulationChartSeriesCollection>
                             </SfAccumulationChart>
-                            }
                         </div>
                     </div>
                     <div class="pt-2 diagram-box">
@@ -166,14 +175,15 @@
                             <DropDownListEvents TValue="string" TItem="PartyElectionResults" ValueChange="OnSelectedPartyChanged"></DropDownListEvents>
                         </SfDropDownList>
                         <div class="mt-4">
-                            <h3>Top 15 Wahllokale</h3>
+                            <h3>Top 15 Wahllokale (absolut)</h3>
                             <SfChart>
                                 <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                                 <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
                                 @if (State.Value.SelectedParty is not null)
                                 {
                                     <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@PollingStationPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                                        <ChartSeries DataSource="@PollingStationPartyResult.Take(15).ToList()" 
+                                                     XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
                                         </ChartSeries>
                                     </ChartSeriesCollection>
                                 }
@@ -186,7 +196,28 @@
                             </SfChart>
                         </div>
                         <div class="mt-4">
-                            <h3>Top 15 Briefwahl-Bezirke</h3>
+                            <h3>Top 15 Wahllokale (relativ)</h3>
+                            <SfChart>
+                                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+                                @if (State.Value.SelectedParty is not null)
+                                {
+                                    <ChartSeriesCollection>
+                                        <ChartSeries DataSource="@PollingStationPartyResult.OrderByDescending(x => x.Percentage).Take(15).ToList()"
+                                                     XName="DistrictName" YName="Percentage" Type="ChartSeriesType.Bar">
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                }
+                                <ChartPrimaryYAxis Title="Anteil Stimmen" LabelFormat="{value}%">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryYAxis>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Wahllokal">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryXAxis>
+                            </SfChart>
+                        </div>
+                        <div class="mt-4">
+                            <h3>Top 15 Briefwahl-Bezirke (absolut)</h3>
                             <SfChart>
                                 <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                                 <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
@@ -194,11 +225,33 @@
                                 @if (State.Value.SelectedParty is not null)
                                 {
                                     <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@PostalPartyResult.Take(15)" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
+                                        <ChartSeries DataSource="@PostalPartyResult.Take(15).ToList()" XName="DistrictName" YName="Votes" Type="ChartSeriesType.Bar">
                                         </ChartSeries>
                                     </ChartSeriesCollection>
                                 }
                                 <ChartPrimaryYAxis Title="Anzahl Stimmen">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryYAxis>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Briefwahlbezirk">
+                                    <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
+                                </ChartPrimaryXAxis>
+                            </SfChart>
+                        </div>
+                        <div class="mt-4">
+                            <h3>Top 15 Briefwahl-Bezirke (relativ)</h3>
+                            <SfChart>
+                                <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                                <ChartEvents OnSeriesRender="OnPartyRender"></ChartEvents>
+
+                                @if (State.Value.SelectedParty is not null)
+                                {
+                                    <ChartSeriesCollection>
+                                        <ChartSeries DataSource="@PostalPartyResult.OrderByDescending(x => x.Percentage).Take(15).ToList()"
+                                                     XName="DistrictName" YName="Percentage" Type="ChartSeriesType.Bar">
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                }
+                                <ChartPrimaryYAxis Title="Anteil Stimmen" LabelFormat="{value}%">
                                     <ChartAxisTitleStyle Size="12px" TextAlignment="Syncfusion.Blazor.Charts.Alignment.Far"/>
                                 </ChartPrimaryYAxis>
                                 <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Briefwahlbezirk">
