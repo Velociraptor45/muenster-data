@@ -16,6 +16,18 @@ public static class FederalElection2025Reducer
         };
     }
 
+    [ReducerMethod(typeof(ToggleSourcesVisibilityAction))]
+    public static FederalElection2025State OnToggleSourcesVisibility(FederalElection2025State state)
+    {
+        return state with
+        {
+            Settings = state.Settings with
+            {
+                SourcesVisible = !state.Settings.SourcesVisible
+            }
+        };
+    }
+
     [ReducerMethod]
     public static FederalElection2025State OnElectionResultsLoaded(FederalElection2025State state,
         ElectionResultsLoadedAction action)
@@ -34,9 +46,9 @@ public static class FederalElection2025Reducer
     {
         return state with
         {
-            ConstituencyMapSettings = state.ConstituencyMapSettings with
+            Settings = state.Settings with
             {
-                ShowFirstVotes = !state.ConstituencyMapSettings.ShowFirstVotes
+                ShowFirstVotes = !state.Settings.ShowFirstVotes
             }
         };
     }
@@ -46,9 +58,9 @@ public static class FederalElection2025Reducer
     {
         return state with
         {
-            ConstituencyMapSettings = state.ConstituencyMapSettings with
+            Settings = state.Settings with
             {
-                ShowRelativeResults = !state.ConstituencyMapSettings.ShowRelativeResults
+                ShowRelativeResults = !state.Settings.ShowRelativeResults
             }
         };
     }

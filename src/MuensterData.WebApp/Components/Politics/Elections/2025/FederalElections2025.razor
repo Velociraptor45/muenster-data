@@ -9,6 +9,7 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Charts
 @using SortOrder = Syncfusion.Blazor.DropDowns.SortOrder
+@using MuensterData.WebApp.Components.Common
 
 @inject IState<FederalElection2025State> State
 @inject IDispatcher Dispatcher
@@ -21,21 +22,41 @@
         <div class="pb-2 fw-bold">Einstellungen</div>
         <div class="d-flex">
             <SfSwitch TChecked="bool"
-                      Checked="@State.Value.ConstituencyMapSettings.ShowFirstVotes"
+                      Checked="@State.Value.Settings.ShowFirstVotes"
                       OnLabel="Erststimme"
                       OffLabel="Zweitstimme"
                       CssClass="vote-class-toggle"
                       ValueChange="OnVoteCategoryToggled">
             </SfSwitch>
             <SfSwitch TChecked="bool"
-                      Checked="@State.Value.ConstituencyMapSettings.ShowRelativeResults"
+                      Checked="@State.Value.Settings.ShowRelativeResults"
                       OnLabel="Relativ"
                       OffLabel="Absolut"
                       CssClass="results-mode-toggle"
                       ValueChange="OnResultsModeToggled">
             </SfSwitch>
+            <div class="ms-auto info-button" @onclick="OnInfoButtonClicked">
+                <i class="bi bi-info-circle"></i>
+                <i class="bi bi-info-circle-fill"></i>
+            </div>
         </div>
     </div>
+    @if (State.Value.Settings.SourcesVisible)
+    {
+        <Sources TCloseAction="ToggleSourcesVisibilityAction">
+            <SourceContent>
+                <div>
+                    <span>Die auf dieser Seite verwendeten Daten stammen von OpenData Münster:</span>
+                    <a href="https://opendata.stadt-muenster.de/dataset/bundestagswahl-wahlergebnisse-2025-m%C3%BCnster">
+                        Bundestagswahl Wahlergebnisse 2025 in Münster
+                    </a>
+                </div>
+                <div>
+                    Lizensiert unter <a href="http://www.govdata.de/dl-de/by-2-0">dl-de/by-2-0</a>
+                </div>
+            </SourceContent>
+        </Sources>
+    }
 
     @if (State.Value.ConstituencyPolygonMap is not null)
     {
@@ -49,7 +70,7 @@
                             <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                             <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
                             <ChartSeriesCollection>
-                                @if (State.Value.ConstituencyMapSettings.ShowRelativeResults)
+                                @if (State.Value.Settings.ShowRelativeResults)
                                 {
                                     <ChartSeries DataSource="@OverallResult"
                                                  XName="PartyName" YName="Percentage" Type="ChartSeriesType.Column">
@@ -103,7 +124,7 @@
                             @if (State.Value.SelectedPollingStation is not null)
                             {
                                 <ChartSeriesCollection>
-                                    @if (State.Value.ConstituencyMapSettings.ShowRelativeResults)
+                                    @if (State.Value.Settings.ShowRelativeResults)
                                     {
                                         <ChartSeries DataSource="@PollingStationResult"
                                                      XName="Name" YName="Percentage" Type="ChartSeriesType.Column">
@@ -179,7 +200,7 @@
                             @if (State.Value.SelectedPostalDistrict is not null)
                             {
                                 <ChartSeriesCollection>
-                                    @if (State.Value.ConstituencyMapSettings.ShowRelativeResults)
+                                    @if (State.Value.Settings.ShowRelativeResults)
                                     {
                                         <ChartSeries DataSource="@PostalDistrictResult"
                                                      XName="Name" YName="Percentage" Type="ChartSeriesType.Column">
@@ -220,7 +241,7 @@
                                 @if (State.Value.SelectedParty is not null)
                                 {
                                     <ChartSeriesCollection>
-                                        @if (State.Value.ConstituencyMapSettings.ShowRelativeResults)
+                                        @if (State.Value.Settings.ShowRelativeResults)
                                         {
                                             <ChartSeries DataSource="@PollingStationPartyResult.OrderByDescending(x => x.Percentage).Take(15).ToList()"
                                                          XName="DistrictName" YName="Percentage" Type="ChartSeriesType.Bar">
@@ -251,7 +272,7 @@
                                 @if (State.Value.SelectedParty is not null)
                                 {
                                     <ChartSeriesCollection>
-                                        @if (State.Value.ConstituencyMapSettings.ShowRelativeResults)
+                                        @if (State.Value.Settings.ShowRelativeResults)
                                         {
                                             <ChartSeries DataSource="@PostalPartyResult.OrderByDescending(x => x.Percentage).Take(15).ToList()"
                                                          XName="DistrictName" YName="Percentage" Type="ChartSeriesType.Bar">
@@ -303,25 +324,25 @@
         { "WerteUnion", "#789ded"}
     };
 
-    private string ChartTitle => State.Value.ConstituencyMapSettings.ShowRelativeResults ? "Anteil Stimmen" : "Anzahl Stimmen";
-    private string LabelFormat => State.Value.ConstituencyMapSettings.ShowRelativeResults ? "{value}%" : "{value}";
+    private string ChartTitle => State.Value.Settings.ShowRelativeResults ? "Anteil Stimmen" : "Anzahl Stimmen";
+    private string LabelFormat => State.Value.Settings.ShowRelativeResults ? "{value}%" : "{value}";
 
     SfMaps? _map;
-    public string ColorPath => State.Value.ConstituencyMapSettings.ShowFirstVotes ? "WinnerFirstVote" : "WinnerSecondVote";
+    public string ColorPath => State.Value.Settings.ShowFirstVotes ? "WinnerFirstVote" : "WinnerSecondVote";
 
-    public IReadOnlyCollection<OverallPartyResult> OverallResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+    public IReadOnlyCollection<OverallPartyResult> OverallResult => State.Value.Settings.ShowFirstVotes
         ? State.Value.OverallResult.FirstVoteResults
         : State.Value.OverallResult.SecondVoteResults;
-    public IReadOnlyCollection<PartyElectionResult> PollingStationResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+    public IReadOnlyCollection<PartyElectionResult> PollingStationResult => State.Value.Settings.ShowFirstVotes
         ? State.Value.SelectedPollingStation!.FirstVote
         : State.Value.SelectedPollingStation!.SecondVote;
-    public IReadOnlyCollection<PartyElectionResult> PostalDistrictResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+    public IReadOnlyCollection<PartyElectionResult> PostalDistrictResult => State.Value.Settings.ShowFirstVotes
         ? State.Value.SelectedPostalDistrict!.FirstVote
         : State.Value.SelectedPostalDistrict!.SecondVote;
-    public IReadOnlyCollection<DistrictPartyResult> PollingStationPartyResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+    public IReadOnlyCollection<DistrictPartyResult> PollingStationPartyResult => State.Value.Settings.ShowFirstVotes
         ? State.Value.SelectedParty!.PollingStationFirstVotes
         : State.Value.SelectedParty!.PollingStationSecondVotes;
-    public IReadOnlyCollection<DistrictPartyResult> PostalPartyResult => State.Value.ConstituencyMapSettings.ShowFirstVotes
+    public IReadOnlyCollection<DistrictPartyResult> PostalPartyResult => State.Value.Settings.ShowFirstVotes
         ? State.Value.SelectedParty!.PostalFirstVotes
         : State.Value.SelectedParty!.PostalSecondVotes;
 
@@ -340,6 +361,11 @@
     private void OnResultsModeToggled()
     {
         Dispatcher.Dispatch(new ToggleResultsModeAction());
+    }
+
+    private void OnInfoButtonClicked()
+    {
+        Dispatcher.Dispatch(new ToggleSourcesVisibilityAction());
     }
 
     private void OnSelectedPollingStationChanged(ChangeEventArgs<string, ConstituencyElectionResult> args)

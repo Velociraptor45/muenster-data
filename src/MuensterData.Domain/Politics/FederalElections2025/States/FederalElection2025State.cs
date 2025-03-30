@@ -9,7 +9,7 @@ public record FederalElection2025State(
     Turnout OverallTurnout,
     IReadOnlyCollection<ConstituencyElectionResult> Results,
     IReadOnlyCollection<PartyElectionResults> ResultByParty,
-    ConstituencyMapSettings ConstituencyMapSettings,
+    ElectionSettings Settings,
     ConstituencyElectionResult? SelectedPollingStation,
     ConstituencyElectionResult? SelectedPostalDistrict,
     PartyElectionResults? SelectedParty)
@@ -33,7 +33,7 @@ public class FederalElection2025FeatureState : Feature<FederalElection2025State>
             new(1, 1),
             [],
             [],
-            new ConstituencyMapSettings(false, true),
+            new ElectionSettings(false, true, false),
             null,
             null,
             null);
